@@ -6,6 +6,10 @@
 #include "MidiImage.h"
 #include "FloppyImage.h"
 
+
+// References:
+// https://www.tavi.co.uk/phobos/fat.html - This has been the most helpful even though the examples are all FAT16 instead of FAT12
+
 const char DiskLabel[] = "Piano       "; // Pad to at least 11 bytes;
 
 bool MidiToImage(std::vector<std::wstring> midiPaths, LPBYTE pImage)
@@ -27,8 +31,10 @@ bool MidiToImage(std::vector<std::wstring> midiPaths, LPBYTE pImage)
 	memcpy(pImage + BOOTSECTOR_LABEL_OFFSET, DiskLabel, BOOTSECTOR_LABEL_LEN);
 
 	// Init the two FATs
+	// (Essentially it's just writing F0 FF FF at the beginning (in 12-bit entries: 0xF0F 0xFFF)
 
 	// Init the directory
+	// Just write the volume label into the first entry
 
 	return true;
 }
