@@ -10,6 +10,7 @@
 #include "WinHelp.h"
 #include "ImageFile.h"
 #include "ThumbDriveImage.h"
+#include "MidiImage.h"
 
 extern const wchar_t* g_syntax;
 bool g_reportSyntax = false;
@@ -66,8 +67,9 @@ int wmain( int argc, wchar_t *argv[])
     // === Get the image =======
     if (g_srcMidiPaths.size() > 0)
     {
-        std::wcerr << L"Midi source not yet implemented." << std::endl;
-        return -1;
+        if (!MidiToImage(g_srcMidiPaths, pImage)) {
+            return -1; // Error already reported
+        }
     }
     else if (g_srcImg.length() > 0)
     {

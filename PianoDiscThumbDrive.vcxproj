@@ -123,13 +123,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BootSector.cpp" />
     <ClCompile Include="ImageFile.cpp" />
+    <ClCompile Include="MidiImage.cpp" />
     <ClCompile Include="PianoDiscThumbDrive.cpp" />
     <ClCompile Include="ThumbDriveImage.cpp" />
     <ClCompile Include="WinHelp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FloppyImage.h" />
+    <ClInclude Include="MidiImage.h" />
     <ClInclude Include="ThumbDriveImage.h" />
     <ClInclude Include="WinHelp.h" />
     <ClInclude Include="ImageFile.h" />

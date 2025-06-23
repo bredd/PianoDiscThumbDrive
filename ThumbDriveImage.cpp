@@ -34,7 +34,7 @@ bool ThumbDriveRead(wchar_t driveLetter, int imageNum, LPBYTE pImage)
 	DWORD bytesRead;
 	if (!ReadFile(hVolume, pImage, FLOPPY_IMAGE_SIZE, &bytesRead, NULL))
 	{
-		std::wcerr << L"Failed to set read from volume." << std::endl;
+		std::wcerr << L"Failed to read full image from volume." << std::endl;
 		ReportError(GetLastError());
 		result = false;
 		goto finally;
