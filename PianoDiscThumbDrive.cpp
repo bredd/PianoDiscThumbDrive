@@ -226,8 +226,8 @@ int parseCommandLine(int argc, wchar_t* argv[]) {
 
 // Substitute windows slashes for forward slashes
 void winSlash(wchar_t* str) {
-    for (; *str != '\0'; ++str) {
-        if (*str == '/') *str = '\\';
+    for (; *str != L'\0'; ++str) {
+        if (*str == L'/') *str = L'\\';
     }
 }
 
@@ -237,7 +237,7 @@ int addToMidiPaths(const wchar_t* pattern)
 
     // Find the directory prefix (if any)
     std::wstring prefix;
-    wchar_t* lastSlash = wcsrchr((wchar_t*)pattern, '\\');
+    wchar_t* lastSlash = wcsrchr((wchar_t*)pattern, L'\\');
     if (NULL != lastSlash) {
         prefix = std::wstring(pattern, lastSlash + 1 - pattern);
     }
