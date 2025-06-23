@@ -46,9 +46,9 @@ bool ImageFileRead(std::wstring filename, LPBYTE pImage)
     return true;
 }
 
-bool ImageFileWrite(std::wstring filename, LPBYTE pImage)
+bool ImageFileWrite(std::wstring filename, LPBYTE pImage, bool overwrite)
 {
-    HANDLE hFile = CreateFileW(filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS /* CREATE_NEW */, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hFile = CreateFileW(filename.c_str(), GENERIC_WRITE, 0, NULL, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         std::wcerr << L"Failed to open destination file: " << filename << std::endl;

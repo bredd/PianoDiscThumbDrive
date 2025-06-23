@@ -15,6 +15,7 @@
 extern const wchar_t* g_syntax;
 bool g_reportSyntax = false;
 bool g_verbose = false;
+bool g_overwrite = false;
 std::vector<std::wstring> g_srcMidiPaths;
 std::wstring g_srcImg;
 std::wstring g_dstImg;
@@ -110,7 +111,7 @@ int wmain( int argc, wchar_t *argv[])
             }
         }
         else {
-            if (!ImageFileWrite(g_dstImg, pImage))
+            if (!ImageFileWrite(g_dstImg, pImage, g_overwrite))
             {
                 return -1;
             }
@@ -147,6 +148,9 @@ int parseCommandLine(int argc, wchar_t* argv[]) {
         }
         else if (0 == _wcsicmp(argv[i], L"-v")) {
             g_verbose = true;
+        }
+        else if (0 == _wcsicmp(argv[i], L"-o")) {
+            g_overwrite = true;
         }
         else if (0 == _wcsicmp(argv[i], L"-midi")) {
             // Advance to the next string and check for end
@@ -303,5 +307,7 @@ L"Syntax:\n"
 "Additional Arguments\n"
 "-h\n"
 "  Help: Print this syntax.\n"
+"-o\n"
+"  Overwrite the destination file if it already exists.\n"
 "-v\n"
 "  Verbose: Print extra information.\n";
