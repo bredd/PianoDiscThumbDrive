@@ -4,6 +4,12 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <cwctype>
+
+#include "FloppyImage.h"
+#include "WinHelp.h"
+#include "ImageFile.h"
+#include "ThumbDriveImage.h"
 
 extern const wchar_t* g_syntax;
 bool g_reportSyntax = false;
@@ -17,21 +23,110 @@ void syntax();
 int parseCommandLine(int argc, wchar_t* argv[]);
 int addToMidiPaths(const wchar_t* pattern);
 void winSlash(wchar_t* str); // Substitute windows slashes for forward slashes
-int getImg(int argc, wchar_t* argv[]);
-int putImg(int argc, wchar_t* argv[]);
-int createImg(int argc, wchar_t* argv[]);
+bool tryParseThumbDriveImageNum(const wchar_t* name, wchar_t* driveLetter, int* imageNumber);
 
 int wmain( int argc, wchar_t *argv[])
 {
     int result = parseCommandLine(argc, argv);
     if (g_reportSyntax) syntax();
     if (result != 0 || g_reportSyntax) return result;
-    std::wcout << std::endl;
-    for (const auto& path : g_srcMidiPaths) {
-        std::wcout << L">> -midi " << path << std::endl;
+
+    if (g_verbose) {
+        if (g_srcMidiPaths.size() > 0) {
+            for (const auto& path : g_srcMidiPaths) {
+                std::wcout << L"-midi " << path << std::endl;
+            }
+        }
+        if (g_srcImg.length() > 0) {
+            std::wcout << L"-simg " << g_srcImg << std::endl;
+        }
+        if (g_dstImg.length() > 0) {
+            std::wcout << L"-dimg " << g_dstImg << std::endl;
+        }
+        if (g_dstDir.length() > 0) {
+            std::wcout << L"-ddir " << g_dstDir << std::endl;
+        }
+        std::wcout << std::endl;
     }
 
-    std::wcout << L"Ready to go!" << std::endl;
+    if (g_srcMidiPaths.size() > 0 && g_srcImg.length() > 0)
+    {
+        std::wcerr << L"Error: Both MIDI and image sources specified. Use either -midi or -simg but not both. (-h for help)" << std::endl;
+        return -1;
+    }
+    if (g_dstImg.length() > 0 && g_dstDir.length() > 0)
+    {
+        std::wcerr << L"Error: Both image and directory destinations specified. Use either -dimg or -ddir but not both. (-h for help)" << std::endl;
+        return -1;
+    }
+    
+    // Allocate a page-aligned buffer for reading and writing
+    LPBYTE pImage = (LPBYTE)VirtualAlloc(NULL, FLOPPY_IMAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+    // === Get the image =======
+    if (g_srcMidiPaths.size() > 0)
+    {
+        std::wcerr << L"Midi source not yet implemented." << std::endl;
+        return -1;
+    }
+    else if (g_srcImg.length() > 0)
+    {
+        std::wcout << L"Reading from: " << g_srcImg << std::endl;
+        wchar_t driveLetter;
+        int imageNum;
+        if (tryParseThumbDriveImageNum(g_srcImg.c_str(), &driveLetter, &imageNum))
+        {
+            if (!ThumbDriveRead(driveLetter, imageNum, pImage))
+            {
+                return -1; // Error already reported
+            }
+        }
+        else {
+            if (!ImageFileRead(g_srcImg, pImage))
+            {
+                return -1;
+            }
+        }
+    }
+    else
+    {
+        std::wcerr << L"Error: Neither MIDI nor image source specified. Use either -midi or -simg. (-h for help)" << std::endl;
+        return -1;
+    }
+
+    // === Store the image ======
+    if (g_dstImg.length() > 0)
+    {
+        std::wcout << L"Writing to: " << g_dstImg << std::endl;
+        wchar_t driveLetter;
+        int imageNum;
+        if (tryParseThumbDriveImageNum(g_dstImg.c_str(), &driveLetter, &imageNum))
+        {
+            if (!ThumbDriveWrite(driveLetter, imageNum, pImage))
+            {
+                return -1; // Error already reported
+            }
+        }
+        else {
+            if (!ImageFileWrite(g_dstImg, pImage))
+            {
+                return -1;
+            }
+        }
+    }
+    else if (g_dstDir.length() > 0)
+    {
+        std::wcerr << L"Directory destination not yet implemented. Use either -dimg or -ddir. (-h for help)" << std::endl;
+        return -1;
+    }
+    else
+    {
+        std::wcerr << L"Error: Neither image nor directory destination specified. Use either -dimg or -ddir. (-h for help)" << std::endl;
+        return -1;
+    }
+
+    std::wcout << L"Success.";
+    return 0;
 }
 
 void syntax() {
@@ -89,8 +184,35 @@ int parseCommandLine(int argc, wchar_t* argv[]) {
                 return -1;
             }
         }
+        else if (0 == _wcsicmp(argv[i], L"-simg")) {
+            // Advance to the next string and check for end
+            ++i;
+            if (i >= argc) {
+                std::wcerr << L"No value for argument '-simg'." << std::endl;
+                return -1;
+            }
+            g_srcImg = argv[i];
+        }
+        else if (0 == _wcsicmp(argv[i], L"-dimg")) {
+            // Advance to the next string and check for end
+            ++i;
+            if (i >= argc) {
+                std::wcerr << L"No value for argument '-dimg'." << std::endl;
+                return -1;
+            }
+            g_dstImg = argv[i];
+        }
+        else if (0 == _wcsicmp(argv[i], L"-ddir")) {
+            // Advance to the next string and check for end
+            ++i;
+            if (i >= argc) {
+                std::wcerr << L"No value for argument '-ddir'." << std::endl;
+                return -1;
+            }
+            g_dstImg = argv[i];
+        }
         else {
-            std::wcout << argv[i] << std::endl;
+            std::wcerr << L"Unexpected argument: " << argv[i] << std::endl;
         }
     }
     return 0;
@@ -132,18 +254,20 @@ int addToMidiPaths(const wchar_t* pattern)
     return findCount;
 }
 
-
-
-int getImg(int argc, wchar_t* argv[]) {
-    return -1;
-}
-
-int putImg(int argc, wchar_t* argv[]) {
-    return -1;
-}
-
-int createImg(int argc, wchar_t* argv[]) {
-    return -1;
+bool tryParseThumbDriveImageNum(const wchar_t* name, wchar_t* driveLetter, int* imageNumber) {
+    if (wcslen(name) < 3 || name[1] != ':') return false;
+    wchar_t letter = towupper(name[0]);
+    if (letter < L'A' || letter > L'Z') return false;
+    int num = 0;
+    const wchar_t* p = name + 2;
+    while (*p != L'\0') {
+        if (*p < L'0' || *p > L'9') return false;
+        num = num * 10 + (*p - L'0');
+        ++p;
+    }
+    *driveLetter = letter;
+    *imageNumber = num;
+    return true;
 }
 
 const wchar_t* g_syntax =

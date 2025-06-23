@@ -123,7 +123,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageFile.cpp" />
     <ClCompile Include="PianoDiscThumbDrive.cpp" />
+    <ClCompile Include="ThumbDriveImage.cpp" />
+    <ClCompile Include="WinHelp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FloppyImage.h" />
+    <ClInclude Include="ThumbDriveImage.h" />
+    <ClInclude Include="WinHelp.h" />
+    <ClInclude Include="ImageFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
