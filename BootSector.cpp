@@ -1,5 +1,7 @@
 #include <windows.h>
 
+#include "FloppyImage.h"
+
 // This is a minimal boot sector. It has the correct signatures and disk parameters.
 // The first three bytes have the traditional jump to boot code. However, the boot
 // code itself, at offset, 0x3E consists of CLI, HLT (bytes 0xFA 0xF4) which simply
