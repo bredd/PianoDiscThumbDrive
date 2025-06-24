@@ -266,6 +266,10 @@ void To8dot3Filename(const wchar_t* srcPath, char* dstFilename)
 	if (NULL == pSrcExt)
 		pSrcExt = pSrcEnd;
 
+	// If there's a number prefix, skip it
+	if (pSrcExt - pSrc > 3 && pSrc[0] >= L'0' && pSrc[0] <= L'9' && pSrc[1] >= L'0' && pSrc[1] <= L'9' && pSrc[2] == L'-')
+		pSrc += 3;
+
 	// Copy name and extension
 	CopyWStringToFnString(pSrc, pSrcExt, dstFilename, dstFilename + 8);
 	CopyWStringToFnString(pSrcExt + 1, pSrcEnd, dstFilename + 8, dstFilename + 11); // this is OK if there's no extension and pSrcExt+1 is greater than pSrcEnd because the copier will just exit the loop
