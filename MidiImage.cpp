@@ -236,11 +236,11 @@ void CopyWStringToFnString(const wchar_t* pSrc, const wchar_t* pSrcEnd, char* pD
 		if ((c > L' ' && c <= '~')
 			&& c != '/' && c != '\\' && c != '"' && c != '<' && c != '>' && c != ':' && c != '|' && c != '?' && c != '*')
 		{
-			*p++ = (char)c;
+			*p++ = std::toupper((char)c);
 		}
 	}
 
-	// Put something in of all was out of range
+	// Put something in if all was out of range
 	if (p == pDst)
 		*p++ = '0';
 

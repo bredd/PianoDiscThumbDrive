@@ -29,6 +29,11 @@ bool tryParseThumbDriveImageNum(const wchar_t* name, wchar_t* driveLetter, int* 
 
 int wmain( int argc, wchar_t *argv[])
 {
+    std::cout << std::hex << FLOPPY_FAT0_OFFSET << std::endl;
+    std::cout << std::hex << FLOPPY_FAT1_OFFSET << std::endl;
+    std::cout << std::hex << FLOPPY_ROOT_DIR_OFFSET << std::endl;
+    std::cout << std::hex << FLOPPY_DATA_OFFSET << std::endl;
+
     int result = parseCommandLine(argc, argv);
     if (g_reportSyntax) syntax();
     if (result != 0 || g_reportSyntax) return result;
